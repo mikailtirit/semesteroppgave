@@ -1,7 +1,7 @@
 # TODO
 
 ## Database
-- [ ] Lag database for assets
+- [x] Lag database for assets
 - [ ] Lag tabeller for assets, users, history og maintenance
 
 ## Login og brukere
