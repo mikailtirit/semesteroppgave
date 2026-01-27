@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>IT Asset Inventory</h1>
+<a href="/add">
+    <button style="background-color: #281745;">+ Add New Asset</button>
+</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>Asset Name</th>
+            <th>Type</th>
+            <th>Serial Number</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+
+    <tbody>
+        {% for asset in assets %}
+        <tr>
+            <td>{{ asset.navn }}</td>
+            <td>{{ asset.type }}</td>
+            <td> {{ asset.sn }}</td>
+            <td>
+                <button>Edit</button>
+                <Button>Delete</Button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table> 
+
+{% endblock %}
