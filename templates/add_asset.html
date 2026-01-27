@@ -1,0 +1,33 @@
+    {% extends "base.html" %}
+
+    {% block content %}
+
+    <h1>Register new IT Asset</h1>
+
+    <form action="/add" method="POST">
+        <p>
+            <label>Asset Name:</label> <br>
+            <input type="text" name="navn" placeholder="e.g. MacBook Pro" required>
+        </p>
+
+        <p>
+            <label> Asset Type:</label> <br>
+            <input type="text" name="type" placeholder="e.g. Laptop" required>
+        </p>
+
+        <p>
+            <label> Serial Number (SN):</label> <br>
+            <input type="text" name="sn" placeholder="e.g. SN-987654" required>
+        </p>
+
+        <button type="submit">Save Asset</button>
+    </form>
+
+    <br>
+    <hr>
+    <a href="/">Back to Dashboard</a>
+
+    {% endblock %}
+</body>
+
+</html> 
