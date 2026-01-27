@@ -14,6 +14,12 @@ class Asset(db.Model):
     type = db.Column(db.String (50)) # Hva det er f.eks. bærbar)
     sn = db.Column(db.String(100)) # Serienummeret
 
+# Her lager vi malen som bestemmer hva vi skal lagre om hvær bruker
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True) # Hvert person får sin egen id
+    username = db.Column(db.String(50), unique=True, nullable=False) #N Navnet du bruker for å logge inn
+    password = db.Column(db.String(100), nullable=False) #Passordet ditt
+    
 
 # Denne linjen lager selve filen database.db 
 with app.app_context():
