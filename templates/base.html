@@ -1,16 +1,15 @@
 <!DOCTYPE html>
-<html lang="no"> <head>
+<html lang="no">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITAM - Asset Management</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>ITAM - IT Asset Managment</title>
 </head>
 <body>
-    {% block content %}
-    {% endblock %}
 
-    <footer>
-        <p></p>
-    </footer>
+    {% block content %}{% endblock %}
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
