@@ -1,84 +1,73 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash as hash_pw, check_password_hash as sjekk_pw
 
 app = Flask(__name__)
 
-# Her forteller vi Flask at vi skal bruke en SQLite-fil som heter database.db
+# Forteller Flask at vi bruker en database-fil som heter database.db
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# Dette forteller Python hvilke "bokser" vi skal ha i databasen vår for utstyr
+# Bestemmer hva vi skal lagre om utstyr (PC-er, utstyr osv.)
 class Asset(db.Model):
-    id = db.Column(db.Integer, primary_key=True)               # gir hver ting unikt nummer
-    navn = db.Column(db.String(100))                           # Navnet på PC-en
-    type = db.Column(db.String(50))                            # Hva det er (f.eks. bærbar)
-    sn = db.Column(db.String(100))                             # Serienummeret
+    id = db.Column(db.Integer, primary_key=True)           
+    navn = db.Column(db.String(100))                      
+    type = db.Column(db.String(50))                     
+    sn = db.Column(db.String(100))                         
 
-# Her lager vi malen som bestemmer hva vi skal lagre om hver bruker
+# Bestemmer hva vi skal lagre om hver bruker (innlogging)
 class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)               # Hver person får sin egen id
-    username = db.Column(db.String(50), unique=True, nullable=False) # Navnet for innlogging
-    password = db.Column(db.String(100), nullable=False)       # Passordet ditt
+    id = db.Column(db.Integer, primary_key=True)               
+    username = db.Column(db.String(50), unique=True, nullable=False) 
+    password = db.Column(db.String(200), nullable=False)    
 
-# Denne linjen lager selve filen database.db
+# Lager selve databasen hvis den ikke finnes fra før
 with app.app_context():
     db.create_all()
 
-# 1. FORSIDEN (Innloggingssiden)
+# 1. FORSIDEN (Viser innloggingsskjemaet)
 @app.route('/')
 def home():
-    return render_template('index.html')                       # Viser innloggingssiden
+    return render_template('index.html')
 
-# 2. REGISTRERING (Lage ny bruker)
+# 2. REGISTRERING (Lager en ny bruker i databasen)
 @app.route('/register', methods=['POST'])
 def register():
-    brukernavn = request.form.get('username')                   # Henter brukernavn fra skjemaet
-    passord = request.form.get('password')                     # Henter passord fra skjemaet
-
+    brukernavn = request.form.get('username')               
+    passord = request.form.get('password')                     
+    
     if brukernavn and passord:
-        ny_bruker = User(username=brukernavn, password=passord) # Samler navn og passord
-        db.session.add(ny_bruker)                              # Setter klar for lagring
-        db.session.commit()                                    # Lagrer det i databasen
-        print(f"*** NY BRUKER LAGRET: {brukernavn} ***")       # Vises i terminalen min
+        # Sjekker om navnet er ledig før vi lager brukeren
+        if not User.query.filter_by(username=brukernavn).first():
+            ny_bruker = User(username=brukernavn, password=hash_pw(passord, method='pbkdf2:sha256'))
+            db.session.add(ny_bruker)                  
+            db.session.commit()                                
+            print(f"*** NY BRUKER LAGRET: {brukernavn} ***")
+            
+    return redirect(url_for('home'))                       
 
-    return redirect(url_for('home'))                           # Sender brukeren tilbake til forsiden
-
-# 3. LOGG INN (Sjekke bruker)
+# 3. LOGG INN (Sjekker om brukernavn og passord stemmer)
 @app.route('/login', methods=['POST'])
 def login():
-    brukernavn = request.form.get('username')                   # Henter brukernavn fra skjemaet
-    passord = request.form.get('password')                     # Henter passord fra skjemaet
+    brukernavn = request.form.get('username')
+    passord = request.form.get('password')
+    
+    bruker = User.query.filter_by(username=brukernavn).first() 
+    
+    # Sjekker om brukeren finnes og om passordet stemmer
+    if bruker and sjekk_pw(bruker.password, passord):
+        print(f"--- LOGG INN: {brukernavn} er inne ---")
+        return redirect(url_for('welcome'))                 
+    
+    print(f"--- FEIL: Innlogging feilet for {brukernavn} ---")
+    return redirect(url_for('home'))                          
 
-    bruker = User.query.filter_by(username=brukernavn).first() # Leter i databasen etter navnet
-
-    if bruker and bruker.password == passord:                  # Sjekker navn og passord
-        print(f"--- LOGG INN: {brukernavn} er nå inne ---")    # Logg hos admin
-        return redirect(url_for('welcome'))                    # SENDER brukeren til velkomstsiden
-    else: 
-        print(f"--- FEIL: Feil passord for {brukernavn} ---")  # Logg hos admin
-        return "Wrong username or password"                    # Feilmelding på nettsiden
-
-# 4. VELKOMSTSIDEN (Mellomstasjonen)
+# 4. VELKOMSTSIDEN (Siden man ser etter innlogging)
 @app.route('/welcome')
 def welcome():
-    return render_template('welcome.html')                     # Viser velkomstsiden
+    return render_template('welcome.html')
 
-# 5. OVERSIKTEN (Viser alt utstyr)
-@app.route('/assets')
-def show_assets():
-    alle_ting = Asset.query.all()                              # Henter alt fra Asset-tabellen
-    return render_template('asset.html', assets=alle_ting)     # Viser oversikten
 
-# 6. LEGG TIL NYTT UTSTYR
-@app.route('/add', methods=['GET', 'POST'])
-def add():
-    if request.method == 'POST':
-        ny_ting = Asset(navn=request.form['navn'], type=request.form['type'], sn=request.form['sn'])
-        db.session.add(ny_ting)                                # Legger til i køen
-        db.session.commit()                                    # Lagrer i databasen
-        return redirect(url_for('show_assets'))                # Går tilbake til oversikten
-    return render_template('add_asset.html')
-
-# Starter Flask-serveren
 if __name__ == '__main__':
     app.run(debug=True)

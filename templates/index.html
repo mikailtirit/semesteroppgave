@@ -1,6 +1,49 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="side">
+    <img src="/static/bilder/bakgrunnloggin.jpg" class="hoved-bakgrunn">
+    
+    <div class="kort">
+        
+        <div class="venstre">
+            <img src="/static/bilder/bakgrunnloggin.jpg" class="venstre-bilde">
+            
+            <div class="venstre-innhold">
+                <div class="logo-del">
+                    <h1>ITAM</h1>
+                    <p>IT Asset Management</p>
+                </div>
+                
+                <h2>Securing Your Digital Future</h2>
+            </div>
+        </div>
 
+        <div class="hoyre">
+            <h3 id="tittel">Opprett konto</h3>
+            
+            <form id="skjema" action="/register" method="POST">
+                <input type="text" name="username" class="felt" placeholder="Brukernavn" required>
+                <input type="password" name="password" class="felt" placeholder="Passord" required>
+                
+                <div id="valg-boks" class="valg">
+                    <label class="sjekk">
+                        <input type="checkbox" id="sjekk-input" required>
+                        <span class="boks"></span>
+                        Jeg godtar vilkårene
+                    </label>
+                </div>
+
+                <div class="knapper">
+                    <button type="submit" class="knapp gronn" id="hoved-btn">Opprett konto</button>
+                    <button type="button" class="knapp graa" onclick="byttModus()" id="bytt-btn">Logg inn</button>
+                </div>
+            </form>
+
+            <div class="linje"><span>eller</span></div>
+            <p class="copy">© 2026 ITAM. Med enerett.</p>
+        </div>
+
+    </div>
+</div>
 {% endblock %}
-
